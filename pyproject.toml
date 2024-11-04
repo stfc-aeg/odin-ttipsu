@@ -9,7 +9,7 @@ description = "Adapter for TTi PSU devices, models MX180TP & MX100QP"
 readme = "README.md"
 authors = [{name = "Evelyn Johns", email = "evelyn.johns@stfc.ac.uk"}]
 requires-python = ">=3.9"
-dependencies = ["odin-control"]
+dependencies = ["odin-control", "odin-react"]
 
 [tool.ruff]
 line-length = 100

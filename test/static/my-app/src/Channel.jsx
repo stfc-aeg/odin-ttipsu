@@ -5,12 +5,12 @@ import 'odin-react/dist/index.css'
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 import Container from 'react-bootstrap/Container';
-import { TitleCard, StatusBox } from 'odin-react';
+import { TitleCard } from 'odin-react';
 import { WithEndpoint, ToggleSwitch } from 'odin-react';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Form from 'react-bootstrap/Form';
-import { ListGroup, InputGroup } from 'react-bootstrap';
+import { ListGroup } from 'react-bootstrap';
 import Card from 'react-bootstrap/Card';
 import CardGroup from 'react-bootstrap/CardGroup';
 
@@ -35,11 +35,6 @@ function Channel(props) {
                             fullpath={"devices/" + String(device_num) + "/channels/" + String(num) + "/status"} 
                             checked={channel? channel.status : "false"} 
                             value={channel? channel.status : "false"} />
-
-                    {/* <StatusBox
-                            type={(channel? channel.status: "false") ? "success" : "dark"}>
-                            {channel? channel.status : "false"}
-                        </StatusBox> */}
                     </Col>
                 </Row> 
 

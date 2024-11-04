@@ -5,11 +5,10 @@ import 'odin-react/dist/index.css'
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 import Container from 'react-bootstrap/Container';
-import { TitleCard, StatusBox } from 'odin-react';
+import { TitleCard } from 'odin-react';
 import { WithEndpoint, ToggleSwitch } from 'odin-react';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
-import { ListGroup, Card } from 'react-bootstrap';
 
 import Channel from './Channel';
 
@@ -32,11 +31,6 @@ function Device(props) {
             <TitleCard title={device.id || " "}>
  
                 <Row>
-                    {/* <Col xs={6}>
-                        <StatusBox label="Remote enable" type={device.remote_enable ? "primary" : "dark"}>
-                            {device.remote_enable || false}
-                        </StatusBox>
-                    </Col> */}
                     <Col xs={12}>
                         <EndpointToggleButton endpoint={PsuEndPoint} event_type="click" label="Enable remote commands"
                         fullpath={"devices/" + String(num) + "/remote_enable"} checked={device?.remote_enable || false} value={device?.remote_enable || false} />
