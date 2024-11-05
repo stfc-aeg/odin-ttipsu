@@ -1,14 +1,13 @@
 import './App.css';
 import React from 'react';
-
 import 'odin-react/dist/index.css'
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 import Container from 'react-bootstrap/Container';
-import { TitleCard } from 'odin-react';
-import { WithEndpoint, ToggleSwitch } from 'odin-react';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
+
+import { WithEndpoint, ToggleSwitch, TitleCard } from 'odin-react';
 
 import Channel from './Channel';
 
@@ -27,13 +26,16 @@ function Device(props) {
 
     return (
         <Container fluid>
-
             <TitleCard title={device.id || " "}>
- 
                 <Row>
-                    <Col xs={12}>
-                        <EndpointToggleButton endpoint={PsuEndPoint} event_type="click" label="Enable remote commands"
-                        fullpath={"devices/" + String(num) + "/remote_enable"} checked={device?.remote_enable || false} value={device?.remote_enable || false} />
+                    <Col>
+                        <EndpointToggleButton 
+                            endpoint={PsuEndPoint} 
+                            event_type="click" 
+                            label="Enable remote commands"
+                            fullpath={"devices/" + String(num) + "/remote_enable"} 
+                            checked={device?.remote_enable || false} 
+                            value={device?.remote_enable || false} />
                     </Col>
                 </Row>
 
@@ -42,9 +44,7 @@ function Device(props) {
                 <Row md={device.num_of_channels}>
                         {ChannelList}
                 </Row> 
-
             </TitleCard>
-
         </Container>
     )
 }

@@ -1,18 +1,17 @@
 import './App.css';
 import React from 'react';
-
 import 'odin-react/dist/index.css'
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 import Container from 'react-bootstrap/Container';
-import { TitleCard } from 'odin-react';
-import { WithEndpoint, ToggleSwitch } from 'odin-react';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Form from 'react-bootstrap/Form';
-import { ListGroup } from 'react-bootstrap';
 import Card from 'react-bootstrap/Card';
 import CardGroup from 'react-bootstrap/CardGroup';
+import ListGroup from 'react-bootstrap/ListGroup';
+
+import { WithEndpoint, ToggleSwitch, TitleCard } from 'odin-react';
 
 const EndpointToggleButton = WithEndpoint(ToggleSwitch);
 const EndpointInput = WithEndpoint(Form.Control)
@@ -24,7 +23,6 @@ function Channel(props) {
     return (
         <Container fluid>
             <TitleCard title={"Channel " + String(num)}>
-
                 <Row>
                     <Col>
                         <EndpointToggleButton 
@@ -79,7 +77,6 @@ function Channel(props) {
                             </Card>
                     </CardGroup>
                 </Row>
-                
             </TitleCard>
         </Container>
     )
