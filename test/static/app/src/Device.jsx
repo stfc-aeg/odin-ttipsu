@@ -6,6 +6,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
+import Accordion from 'react-bootstrap/Accordion';
 
 import { WithEndpoint, ToggleSwitch, TitleCard } from 'odin-react';
 
@@ -26,7 +27,8 @@ function Device(props) {
 
     return (
         <Container fluid>
-            <TitleCard title={device.id || " "}>
+            <Accordion.Header> {(device.id || " ") + " - " + (device.host || " ")}</Accordion.Header>
+            <Accordion.Body>
                 <Row>
                     <Col>
                         <EndpointToggleButton 
@@ -42,9 +44,9 @@ function Device(props) {
                 <Row><p></p></Row>
 
                 <Row md={device.num_of_channels}>
-                        {ChannelList}
+                    {ChannelList}
                 </Row> 
-            </TitleCard>
+            </Accordion.Body>
         </Container>
     )
 }

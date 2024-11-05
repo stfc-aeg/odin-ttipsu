@@ -5,6 +5,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
+import Accordion from 'react-bootstrap/Accordion';
 
 import { useAdapterEndpoint } from 'odin-react';
 
@@ -16,9 +17,11 @@ function MainPage() {
 
     const DeviceList = PsuEndPoint.data?.devices ? Object.entries(PsuEndPoint.data?.devices).map(
                             ([key, value]) => (
+                                <Accordion.Item eventKey={key}>
                                 <Row>
                                     <Device num={key} PsuEndPoint={PsuEndPoint} device={value} />
                                 </Row>
+                                </Accordion.Item>
                             )
                         ) : <></>
 
@@ -28,7 +31,9 @@ function MainPage() {
         <Container fluid>
             <Row><p></p></Row>
 
-            {DeviceList}
+            <Accordion defaultActiveKey="1" alwaysOpen>
+                {DeviceList}
+            </Accordion>
         </Container>
     )
 }
