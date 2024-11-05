@@ -59,6 +59,7 @@ class PsuDevice():
 
         self.tree = ParameterTree({
             'id': self.id,
+            'host': self.host,
             'num_of_channels': self.num_of_channels,
             'channels': ParameterTree(self.channel_trees),
             'remote_enable': (lambda: self.remote_enable, self.set_remote_enable)
@@ -182,3 +183,7 @@ class PsuDevice():
     def get_id(self):
         """Get id."""
         return self.id
+    
+    def get_host(self):
+        """Get host IP address"""
+        return self.host
