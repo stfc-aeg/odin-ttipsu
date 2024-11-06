@@ -8,7 +8,7 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Accordion from 'react-bootstrap/Accordion';
 
-import { WithEndpoint, ToggleSwitch, TitleCard } from 'odin-react';
+import { WithEndpoint, ToggleSwitch } from 'odin-react';
 
 import Channel from './Channel';
 
@@ -27,7 +27,7 @@ function Device(props) {
 
     return (
         <Container fluid>
-            <Accordion.Header> {(device.id || " ") + " - " + (device.host || " ")}</Accordion.Header>
+            <Accordion.Header>{(device.id || " ") + " - " + (device.host || " ")}</Accordion.Header>
             <Accordion.Body>
                 <Row>
                     <Col>
