@@ -31,7 +31,7 @@ function MainPage() {
         <Container fluid>
             <Row><p></p></Row>
 
-            <Accordion defaultActiveKey="1" alwaysOpen>
+            <Accordion alwaysOpen>
                 {DeviceList}
             </Accordion>
         </Container>
