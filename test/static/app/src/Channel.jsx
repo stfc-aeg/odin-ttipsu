@@ -51,7 +51,7 @@ function Channel(props) {
                                                 endpoint={PsuEndPoint} 
                                                 event_type="change" 
                                                 type="number" 
-                                                step={0.5} 
+                                                step={0.1} 
                                                 disabled={(device ? device.remote_enable : "false") ? false : true} 
                                                 fullpath={"devices/" + String(device_num) + "/channels/" + String(num) + "/voltage/setting"}/>
                                         </ListGroup.Item>
