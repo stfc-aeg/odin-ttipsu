@@ -6,6 +6,7 @@ connection with a PSU device.
 
 import logging
 import socket
+import time
 
 from odin.adapters.parameter_tree import ParameterTree
 from tornado.ioloop import PeriodicCallback
@@ -19,7 +20,7 @@ class PsuDevice():
     Handles local/remote modes of the device, initialises PsuChannel objects.
     """
 
-    def __init__(self, host, port, interval):
+    def __init__(self, host, port, device_num, interval):
         """Initialise PsuDevice object.
 
         Keyword arguements:
@@ -29,8 +30,10 @@ class PsuDevice():
 
         Check model id and assign number of channels.
         """
+
         self.host = host
         self.port = port
+        self.num = device_num
         self.interval = interval
 
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -38,6 +41,8 @@ class PsuDevice():
         self.channels = []
         self.channel_trees = {}
         self.remote_enable = 0
+
+        self.uptime_axis = []
 
         try:
             self.s.settimeout(3)
@@ -62,7 +67,9 @@ class PsuDevice():
             'host': self.host,
             'num_of_channels': self.num_of_channels,
             'channels': ParameterTree(self.channel_trees),
-            'remote_enable': (lambda: self.remote_enable, self.set_remote_enable)
+            'remote_enable': (lambda: self.remote_enable, self.set_remote_enable),
+            'bg_task_uptime': (self.get_uptime, None),
+            'uptime_axis': (lambda: self.uptime_axis, None)
         })
 
         if self.remote_enable:
@@ -108,19 +115,40 @@ class PsuDevice():
             self.background_callback, self.interval * 1000
         )
         self.background_task.start()
+        self.update_trees()
+        self.start_time = time.time() 
 
     def stop_background_tasks(self):
         """Stop background tasks."""
         self.remote_enable = False
         self.background_task.stop()
+        self.uptime_axis = []
+        # for channel in self.channels:
+        #     channel.reset_graphs()
+
+    def get_uptime(self):
+        """Get uptime of background tasks"""
+        if self.remote_enable:
+            uptime = time.time() - self.start_time 
+        else:
+            uptime = 0
+        return uptime
+    
+    def update_uptime(self, time):
+        self.uptime_axis.append(time)
+        if len(self.uptime_axis) > 30:
+            self.uptime_axis.pop(0)
 
     def background_callback(self):
         """Get voltage and current output readback from psu."""
+        self.update_uptime(self.get_uptime())
         for channel in self.channels:
             voltage = channel.read_voltage()
             current = channel.read_current()
+            power = channel.get_power()
             channel.voltage = voltage
             channel.current = current
+            channel.power = power
 
     def update_trees(self):
         """Update tree values for each channel."""
@@ -187,3 +215,9 @@ class PsuDevice():
     def get_host(self):
         """Get host IP address"""
         return self.host
+    
+    def get_num(self):
+        return self.num
+    
+    def get_channels(self):
+        return self.channels

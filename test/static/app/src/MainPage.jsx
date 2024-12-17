@@ -11,9 +11,11 @@ import { useAdapterEndpoint } from 'odin-react';
 
 import Device from './Device';
 
-function MainPage() {
+function MainPage(props) {
 
-    const PsuEndPoint = useAdapterEndpoint("ttipsu", "http://localhost:8888", 1000);
+    const {PsuEndPoint} = props;
+
+    //const PsuEndPoint = useAdapterEndpoint("ttipsu", "http://localhost:8888", 1000);
 
     const DeviceList = PsuEndPoint.data?.devices ? Object.entries(PsuEndPoint.data?.devices).map(
                             ([key, value]) => (

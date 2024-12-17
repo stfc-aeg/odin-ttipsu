@@ -6,7 +6,6 @@ belonging to a PSU device.
 
 from odin.adapters.parameter_tree import ParameterTree
 
-
 class PsuChannel:
     """PsuChannel class.
 
@@ -20,29 +19,38 @@ class PsuChannel:
         psu -- PsuClient object
         channel_num -- which numbered channel
         """
+
         self.num = channel_num
         self.psu = psu
 
         self.status = self.get_onoff_status()
+
         self.voltage = 0
         self.current = 0
+        self.power = 0
+
         self.set_voltage = self.read_set_voltage()
         self.set_current = self.read_set_current()
-
+        
         voltage_tree = ParameterTree({
             'setting': (lambda: self.set_voltage, self.set_new_voltage),
-            'output': (lambda: self.voltage, None)
+            'output': (lambda: self.voltage, None),
         })
 
         current_tree = ParameterTree({
             'setting': (lambda: self.set_current, self.set_new_current),
-            'output': (lambda: self.current, None)
+            'output': (lambda: self.current, None),
+        })
+
+        power_tree = ParameterTree({
+            'output': (lambda: self.power, None),
         })
 
         self.tree = ParameterTree({
             'status': (lambda: self.status, self.set_status),
             'voltage': voltage_tree,
-            'current': current_tree
+            'current': current_tree,
+            'power': power_tree
         })
 
     def set_status(self, status):
@@ -94,6 +102,10 @@ class PsuChannel:
         self.psu.send(("I" + str(self.num) + "O?").encode('utf-8'))
         current = float(self.psu.receive().strip()[:-1])
         return current
+    
+    def get_power(self):
+        power = self.read_voltage() * self.read_current()
+        return power
 
     def get_name(self):
         """Create channel name from number."""

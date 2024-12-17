@@ -23,11 +23,22 @@ class TtiPsuAdapter(ApiAdapter):
         super(TtiPsuAdapter, self).__init__(**kwargs)
 
         # Parse options
+        # background_task_interval = float(self.options.get('background_task_interval', 1.0))
+        # connections = self.options.get('connections').split(" ")
+
+        # self.controller = PsuController(background_task_interval, connections, None)
+        # logging.debug('PsuAdapter loaded')
+
+    def initialize(self, adapters):
+        adapters_list = dict((k, v) for k, v in adapters.items() if v is not self)
+        graph_adapter = adapters_list["graph"]
+        # graph_adapter.load_config()
+
+        # # Parse options
         background_task_interval = float(self.options.get('background_task_interval', 1.0))
         connections = self.options.get('connections').split(" ")
 
-        self.controller = PsuController(background_task_interval, connections)
-
+        self.controller = PsuController(background_task_interval, connections, graph_adapter)
         logging.debug('PsuAdapter loaded')
 
     @response_types('application/json', default='application/json')
