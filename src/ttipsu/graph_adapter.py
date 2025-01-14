@@ -28,6 +28,9 @@ class GraphDataset():
         self.retention = retention
         self.name = name
 
+        self.max = max(self.data, default=0)
+        self.min = min(self.data, default=0)
+
         self.data_loop = PeriodicCallback(self.get_data, self.time_interval * 1000)
 
         logging.debug("Created Dataset %s, interval of %f seconds", name, self.time_interval)
@@ -38,11 +41,13 @@ class GraphDataset():
             "timestamps": (lambda: self.timestamps, None),
             "interval": (self.time_interval, None),
             "retention": (self.retention * self.time_interval, None),
-            "loop_running": (lambda: self.data_loop.is_running(), None)
+            "loop_running": (lambda: self.data_loop.is_running(), None),
+            "max": (lambda: self.max, None),
+            "min": (lambda: self.min, None)
         })
 
     def get_data(self):
-        cur_time = str(time.localtime()[3]) + ":" + str(time.localtime()[4]) + ":" + str(time.localtime()[5])
+        cur_time = time.strftime("%H:%M:%S", time.localtime())
         response = self.adapter.get(self.get_path, ApiAdapterRequest(None))
         data = response.data[self.get_path.split("/")[-1]]
 
@@ -51,6 +56,9 @@ class GraphDataset():
         if len(self.data) > self.retention:
             self.data.pop(0)
             self.timestamps.pop(0)
+
+        self.max = max(self.data)
+        self.min = min(self.data)
 
     def get_adapter(self, adapter_list):
         self.adapter = adapter_list[self.adapter_name]
@@ -67,21 +75,36 @@ class AvgGraphDataset(GraphDataset):
         self.source = source
         self.num_points_get = int(self.time_interval / self.source.time_interval)
 
+        self.min_list = []
+        self.max_list = []
+
         logging.debug("This is an averaging dataset, averaging from %s", self.source)
 
     def get_data(self):
-        cur_time = str(time.localtime()[3]) + ":" + str(time.localtime()[4]) + ":" + str(time.localtime()[5])
+        cur_time = time.strftime("%H:%M:%S", time.localtime())
         data = self.source.data[-self.num_points_get:]  # slice, get last x elements
+
+        data_min = min(data)
+        data_max = max(data)
+
         # data = list(zip(*data))[1]  # zip the timestamps and data of target list into separate
         data = data = sum(data) / len(data)
 
-        # logging.debug(data)
+        self.min_list.append(data_min)
+        self.max_list.append(data_max)
 
         self.data.append(data)
         self.timestamps.append(cur_time)
+
         if len(self.data) > self.retention:
             self.data.pop(0)
             self.timestamps.pop(0)
+
+            self.min_list.pop(0)
+            self.max_list.pop(0)
+
+        self.min = min(self.min_list)
+        self.max = max(self.max_list)
 
     def get_adapter(self, adapter_list):
         pass  # method empty on purpose as we don't need the adapter for this type of dataset
@@ -99,9 +122,9 @@ class GraphAdapter(ApiAdapter):
 
         self.datasets = {}
 
-        self.param_tree = ParameterTree({}) #???
+        self.param_tree = ParameterTree({})
 
-        self.load_config() #only time its called - necessary?
+        self.load_config() 
 
     def load_config(self):
 
@@ -112,33 +135,29 @@ class GraphAdapter(ApiAdapter):
             for name, info in config.items():
                 try:
                     if info.get('average', False):
-                        # dataset is an averaging of another dataset
-                        # dataset = AvgGraphDataset(
-                        #     time_interval=info['interval'],
-                        #     retention=info['retention'],
-                        #     name=name,
-                        #     source=self.dataset_trees[info['source']]
-                        # )
-
-                        # self.dataset_trees[name] = dataset
-
-                        self.add_avg_dataset(info['interval'], info['retention'], name, info['source'])
+                        self.add_avg_dataset(info['interval'], info['retention'], name, info['source'], name) #test this!
                     else:
-                        # dataset = GraphDataset(
-                        #     time_interval=info['interval'],
-                        #     adapter=info['adapter'],
-                        #     get_path=info['get_path'],
-                        #     retention=info['retention'],
-                        #     name=name
-                        # )
-                        self.add_dataset(info['adapter'], info['get_path'], info['interval'], info['retention'], name)
+                        self.add_dataset(info['adapter'], info['get_path'], info['interval'], info['retention'], name, name)
                     
                 except KeyError as err:
                     logging.error("Error creating dataset %s: %s", (name), err)
 
         self.param_tree = ParameterTree({
             name: dataset.param_tree for (name, dataset) in self.dataset_trees.items()
-        }) #needed?
+        }) 
+
+    def add_to_dict(self, location, data, dict):
+        param_dict = dict
+        parts = location.strip("/").split("/")
+        for path_part in parts:
+            try:
+                if path_part != parts[-1]:
+                    param_dict = param_dict[path_part]
+                else:
+                    param_dict[path_part] = data
+            except KeyError:
+                param_dict[path_part] = {}
+                param_dict = param_dict[path_part]
 
     def add_dataset(self, adapter, path, interval, retention, name, location):
 
@@ -150,67 +169,26 @@ class GraphAdapter(ApiAdapter):
             name=name
             )
 
-        if location.split("/")[0] in self.dataset_trees:
-            if location.split("/")[1] in self.dataset_trees[location.split("/")[0]]:
-                if location.split("/")[2] in self.dataset_trees[location.split("/")[0]][location.split("/")[1]]:
-                    self.dataset_trees[location.split("/")[0]][location.split("/")[1]][location.split("/")[2]][location.split("/")[3]] = dataset.param_tree
-                else:
-                    self.dataset_trees[location.split("/")[0]][location.split("/")[1]][location.split("/")[2]] = {location.split("/")[3] : dataset.param_tree}
-            else:
-                self.dataset_trees[location.split("/")[0]][location.split("/")[1]] = {location.split("/")[2] : {location.split("/")[3] : dataset.param_tree}}
-        else:
-            self.dataset_trees[location.split("/")[0]] = {location.split("/")[1] : {location.split("/")[2] : {location.split("/")[3] : dataset.param_tree}}}
-
-        if location.split("/")[0] in self.datasets:
-            if location.split("/")[1] in self.datasets[location.split("/")[0]]:
-                if location.split("/")[2] in self.datasets[location.split("/")[0]][location.split("/")[1]]:
-                    self.datasets[location.split("/")[0]][location.split("/")[1]][location.split("/")[2]][location.split("/")[3]] = dataset
-                else:
-                    self.datasets[location.split("/")[0]][location.split("/")[1]][location.split("/")[2]] = {location.split("/")[3] : dataset}
-            else:
-                self.datasets[location.split("/")[0]][location.split("/")[1]] = {location.split("/")[2] : {location.split("/")[3] : dataset}}
-        else:
-            self.datasets[location.split("/")[0]] = {location.split("/")[1] : {location.split("/")[2] : {location.split("/")[3] : dataset}}}
-
-        #only works with specific path lengths!!
+        self.add_to_dict(location, dataset.param_tree, self.dataset_trees)
+        self.add_to_dict(location, dataset, self.datasets)
 
         self.param_tree = ParameterTree(self.dataset_trees)
 
     def add_avg_dataset(self, interval, retention, name, source, location):
 
+        source_dataset = self.datasets[source.split("/")[0]][source.split("/")[1]][source.split("/")[2]][source.split("/")[3]]
+
         dataset = AvgGraphDataset(
             time_interval=interval,
             retention=retention,
             name=name,
-            source=self.datasets[source.split("/")[0]][source.split("/")[1]][source.split("/")[2]][source.split("/")[3]] 
+            source=source_dataset 
         )
 
-        if location.split("/")[0] in self.dataset_trees:
-            if location.split("/")[1] in self.dataset_trees[location.split("/")[0]]:
-                if location.split("/")[2] in self.dataset_trees[location.split("/")[0]][location.split("/")[1]]:
-                    self.dataset_trees[location.split("/")[0]][location.split("/")[1]][location.split("/")[2]][location.split("/")[3]] = dataset.param_tree
-                else:
-                    self.dataset_trees[location.split("/")[0]][location.split("/")[1]][location.split("/")[2]] = {location.split("/")[3] : dataset.param_tree}
-            else:
-                self.dataset_trees[location.split("/")[0]][location.split("/")[1]] = {location.split("/")[2] : {location.split("/")[3] : dataset.param_tree}}
-        else:
-            self.dataset_trees[location.split("/")[0]] = {location.split("/")[1] : {location.split("/")[2] : {location.split("/")[3] : dataset.param_tree}}}
-
-        if location.split("/")[0] in self.datasets:
-            if location.split("/")[1] in self.datasets[location.split("/")[0]]:
-                if location.split("/")[2] in self.datasets[location.split("/")[0]][location.split("/")[1]]:
-                    self.datasets[location.split("/")[0]][location.split("/")[1]][location.split("/")[2]][location.split("/")[3]] = dataset
-                else:
-                    self.datasets[location.split("/")[0]][location.split("/")[1]][location.split("/")[2]] = {location.split("/")[3] : dataset}
-            else:
-                self.datasets[location.split("/")[0]][location.split("/")[1]] = {location.split("/")[2] : {location.split("/")[3] : dataset}}
-        else:
-            self.datasets[location.split("/")[0]] = {location.split("/")[1] : {location.split("/")[2] : {location.split("/")[3] : dataset}}}
-
-        # self.dataset_trees[name] = dataset.param_tree 
+        self.add_to_dict(location, dataset.param_tree, self.dataset_trees)
+        self.add_to_dict(location, dataset, self.datasets)
 
         self.param_tree = ParameterTree(self.dataset_trees)
-
 
     def initialize(self, adapters):
         self.adapters = dict((k, v) for k, v in adapters.items() if v is not self)

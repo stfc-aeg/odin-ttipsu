@@ -8,17 +8,9 @@ import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Accordion from 'react-bootstrap/Accordion';
-import Button from 'react-bootstrap/Button';
-import Tab from 'react-bootstrap/Tab';
-import Tabs from 'react-bootstrap/Tabs';
-import Nav from 'react-bootstrap/Nav';
-
 import {useState} from 'react';
 
 import { ToggleSwitch } from 'odin-react';
-
-import MonitorGraph from './MonitorGraph';
-
 
 function GraphChannel(props) {
 
@@ -26,7 +18,9 @@ function GraphChannel(props) {
 
     const [powermode, setPowermode] = useState(false);
 
-    // const plots = PsuEndPoint.data?.plots ? PsuEndPoint.data.plots[device_num -1][channel_num -1] : [];
+    const [showsettings, setShowSettings] = useState(true);
+    const [showmax, setShowMax] = useState(false);
+    const [showmin, setShowMin] = useState(false);
 
     var layout_1min = {
         showlegend: false,
@@ -48,7 +42,8 @@ function GraphChannel(props) {
         
         yaxis3: {title: {text: "power (W)"},
                 rangemode: 'tozero',
-                visible: (powermode ? true : false)
+                visible: (powermode ? true : false),
+                range: [0, 1.2*channel.power.max]
             },
 
         xaxis: {title:"time", 
@@ -128,7 +123,8 @@ function GraphChannel(props) {
         
         yaxis3: {title: {text: "power (W)"},
                 rangemode: 'tozero',
-                visible: (powermode ? true : false)
+                visible: (powermode ? true : false),
+                range: [0, 1.2*(GraphEndPoint.data?.["5mins"]?.["device" + String(device_num)]?.["channel" + String(channel_num)]?.power?.max ? GraphEndPoint.data["5mins"]?.["device" + String(device_num)]?.["channel" + String(channel_num)]?.power?.max : [])]
             },
 
         xaxis: {title:"time", 
@@ -159,7 +155,7 @@ function GraphChannel(props) {
                     yanchor: 'bottom',
                     textposition: 'end'
                 },
-                visible: (!powermode ? true : false)
+                visible: (!powermode ? true : false) && (showsettings ? true : false) ? true: false
             },
             
             {
@@ -183,8 +179,153 @@ function GraphChannel(props) {
                     yanchor: 'bottom',
                     textposition: 'start'
                 },
-                visible: (!powermode ? true : false)
+                visible: (!powermode ? true : false) && (showsettings ? true : false) ? true: false
+            },
+
+            {
+                type: 'line',
+                yref: 'y',
+                xref: 'paper',
+                x0: 0,
+                y0: (GraphEndPoint.data?.["5mins"]?.["device" + String(device_num)]?.["channel" + String(channel_num)]?.voltage?.max ? GraphEndPoint.data["5mins"]?.["device" + String(device_num)]?.["channel" + String(channel_num)]?.voltage?.max : []),
+                x1:  1,
+                y1: (GraphEndPoint.data?.["5mins"]?.["device" + String(device_num)]?.["channel" + String(channel_num)]?.voltage?.max ? GraphEndPoint.data["5mins"]?.["device" + String(device_num)]?.["channel" + String(channel_num)]?.voltage?.max : []),
+                line: {
+                    color: 'rgb(71, 124, 181)',
+                    width: 2,
+                    dash: 'dot'
+                },
+                label: {
+                    font: {
+                        color: 'rgb(71, 124, 181)'
+                    },
+                    text: "voltage max",
+                    yanchor: 'bottom',
+                    textposition: 'start'
+                },
+                visible: (!powermode ? true : false) && (showmax ? true : false) ? true : false
+            },
+
+            {
+                type: 'line',
+                yref: 'y2',
+                xref: 'paper',
+                x0: 0,
+                y0: (GraphEndPoint.data?.["5mins"]?.["device" + String(device_num)]?.["channel" + String(channel_num)]?.current?.max ? GraphEndPoint.data["5mins"]?.["device" + String(device_num)]?.["channel" + String(channel_num)]?.current?.max : []),
+                x1:  1,
+                y1: (GraphEndPoint.data?.["5mins"]?.["device" + String(device_num)]?.["channel" + String(channel_num)]?.current?.max ? GraphEndPoint.data["5mins"]?.["device" + String(device_num)]?.["channel" + String(channel_num)]?.current?.max : []),
+                line: {
+                    color: 'rgb(245, 144, 44)',
+                    width: 2,
+                    dash: 'dot'
+                },
+                label: {
+                    font: {
+                        color: 'rgb(245, 144, 44)'
+                    },
+                    text: "current max",
+                    yanchor: 'bottom',
+                    textposition: 'end'
+                },
+                visible: (!powermode ? true : false) && (showmax ? true : false) ? true : false
+            },
+
+            {
+                type: 'line',
+                yref: 'y',
+                xref: 'paper',
+                x0: 0,
+                y0: (GraphEndPoint.data?.["5mins"]?.["device" + String(device_num)]?.["channel" + String(channel_num)]?.voltage?.min ? GraphEndPoint.data["5mins"]?.["device" + String(device_num)]?.["channel" + String(channel_num)]?.voltage?.min : []),
+                x1:  1,
+                y1: (GraphEndPoint.data?.["5mins"]?.["device" + String(device_num)]?.["channel" + String(channel_num)]?.voltage?.min ? GraphEndPoint.data["5mins"]?.["device" + String(device_num)]?.["channel" + String(channel_num)]?.voltage?.min : []),
+                line: {
+                    color: 'rgb(71, 124, 181)',
+                    width: 2,
+                    dash: 'dot'
+                },
+                label: {
+                    font: {
+                        color: 'rgb(71, 124, 181)'
+                    },
+                    text: "voltage min",
+                    yanchor: 'bottom',
+                    textposition: 'start'
+                },
+                visible: (!powermode ? true : false) && (showmin ? true : false) ? true : false
+            },
+
+            {
+                type: 'line',
+                yref: 'y2',
+                xref: 'paper',
+                x0: 0,
+                y0: (GraphEndPoint.data?.["5mins"]?.["device" + String(device_num)]?.["channel" + String(channel_num)]?.current?.min ? GraphEndPoint.data["5mins"]?.["device" + String(device_num)]?.["channel" + String(channel_num)]?.current?.min : []),
+                x1:  1,
+                y1: (GraphEndPoint.data?.["5mins"]?.["device" + String(device_num)]?.["channel" + String(channel_num)]?.current?.min ? GraphEndPoint.data["5mins"]?.["device" + String(device_num)]?.["channel" + String(channel_num)]?.current?.min : []),
+                line: {
+                    color: 'rgb(245, 144, 44)',
+                    width: 2,
+                    dash: 'dot'
+                },
+                label: {
+                    font: {
+                        color: 'rgb(245, 144, 44)'
+                    },
+                    text: "current min",
+                    yanchor: 'bottom',
+                    textposition: 'end'
+                },
+                visible: (!powermode ? true : false) && (showmin ? true : false) ? true : false
+            },
+
+            {
+                type: 'line',
+                yref: (powermode ? 'y3' : 'y'),
+                xref: 'paper',
+                x0: 0,
+                y0: (GraphEndPoint.data?.["5mins"]?.["device" + String(device_num)]?.["channel" + String(channel_num)]?.power?.min ? GraphEndPoint.data["5mins"]?.["device" + String(device_num)]?.["channel" + String(channel_num)]?.power?.min : []),
+                x1:  1,
+                y1: (GraphEndPoint.data?.["5mins"]?.["device" + String(device_num)]?.["channel" + String(channel_num)]?.power?.min ? GraphEndPoint.data["5mins"]?.["device" + String(device_num)]?.["channel" + String(channel_num)]?.power?.min : []),
+                line: {
+                    color: 'rgb(71, 124, 181)',
+                    width: 2,
+                    dash: 'dot'
+                },
+                label: {
+                    font: {
+                        color: 'rgb(71, 124, 181)'
+                    },
+                    text: "power min",
+                    yanchor: 'bottom',
+                    textposition: 'start'
+                },
+                visible: (powermode ? true : false) && (showmin ? true : false) ? true : false
+            },
+
+            {
+                type: 'line',
+                yref: (powermode ? 'y3' : 'y'),
+                xref: 'paper',
+                x0: 0,
+                y0: (GraphEndPoint.data?.["5mins"]?.["device" + String(device_num)]?.["channel" + String(channel_num)]?.power?.max ? GraphEndPoint.data["5mins"]?.["device" + String(device_num)]?.["channel" + String(channel_num)]?.power?.max : []),
+                x1:  1,
+                y1: (GraphEndPoint.data?.["5mins"]?.["device" + String(device_num)]?.["channel" + String(channel_num)]?.power?.max ? GraphEndPoint.data["5mins"]?.["device" + String(device_num)]?.["channel" + String(channel_num)]?.power?.max : []),
+                line: {
+                    color: 'rgb(71, 124, 181)',
+                    width: 2,
+                    dash: 'dot'
+                },
+                label: {
+                    font: {
+                        color: 'rgb(71, 124, 181)'
+                    },
+                    text: "power max",
+                    yanchor: 'bottom',
+                    textposition: 'start'
+                },
+                visible: (powermode ? true : false) && (showmax ? true : false) ? true : false
             }
+
         ]
     }
 
@@ -208,13 +349,14 @@ function GraphChannel(props) {
         
         yaxis3: {title: {text: "power (W)"},
                 rangemode: 'tozero',
-                visible: (powermode ? true : false)
+                visible: (powermode ? true : false),
+                range: [0, 1.2*(GraphEndPoint.data?.["24hr"]?.["device" + String(device_num)]?.["channel" + String(channel_num)]?.power?.max ? GraphEndPoint.data["24hr"]?.["device" + String(device_num)]?.["channel" + String(channel_num)]?.power?.max : [])]
             },
 
         xaxis: {title:"time", 
                 showticklabels: true,
                 tickmode: "linear",
-                dtick: 5
+                dtick: 60
             },
 
         shapes: [
@@ -239,7 +381,7 @@ function GraphChannel(props) {
                     yanchor: 'bottom',
                     textposition: 'end'
                 },
-                visible: (!powermode ? true : false)
+                visible: (!powermode ? true : false) && (showsettings ? true : false) ? true: false
             },
             
             {
@@ -263,7 +405,151 @@ function GraphChannel(props) {
                     yanchor: 'bottom',
                     textposition: 'start'
                 },
-                visible: (!powermode ? true : false)
+                visible: (!powermode ? true : false) && (showsettings ? true : false) ? true: false
+            },
+
+            {
+                type: 'line',
+                yref: 'y',
+                xref: 'paper',
+                x0: 0,
+                y0: (GraphEndPoint.data?.["24hr"]?.["device" + String(device_num)]?.["channel" + String(channel_num)]?.voltage?.max ? GraphEndPoint.data["24hr"]?.["device" + String(device_num)]?.["channel" + String(channel_num)]?.voltage?.max : []),
+                x1:  1,
+                y1: (GraphEndPoint.data?.["24hr"]?.["device" + String(device_num)]?.["channel" + String(channel_num)]?.voltage?.max ? GraphEndPoint.data["24hr"]?.["device" + String(device_num)]?.["channel" + String(channel_num)]?.voltage?.max : []),
+                line: {
+                    color: 'rgb(71, 124, 181)',
+                    width: 2,
+                    dash: 'dot'
+                },
+                label: {
+                    font: {
+                        color: 'rgb(71, 124, 181)'
+                    },
+                    text: "voltage max",
+                    yanchor: 'bottom',
+                    textposition: 'start'
+                },
+                visible: (!powermode ? true : false) && (showmax ? true : false) ? true : false
+            },
+
+            {
+                type: 'line',
+                yref: 'y2',
+                xref: 'paper',
+                x0: 0,
+                y0: (GraphEndPoint.data?.["24hr"]?.["device" + String(device_num)]?.["channel" + String(channel_num)]?.current?.max ? GraphEndPoint.data["24hr"]?.["device" + String(device_num)]?.["channel" + String(channel_num)]?.current?.max : []),
+                x1:  1,
+                y1: (GraphEndPoint.data?.["24hr"]?.["device" + String(device_num)]?.["channel" + String(channel_num)]?.current?.max ? GraphEndPoint.data["24hr"]?.["device" + String(device_num)]?.["channel" + String(channel_num)]?.current?.max : []),
+                line: {
+                    color: 'rgb(245, 144, 44)',
+                    width: 2,
+                    dash: 'dot'
+                },
+                label: {
+                    font: {
+                        color: 'rgb(245, 144, 44)'
+                    },
+                    text: "current max",
+                    yanchor: 'bottom',
+                    textposition: 'end'
+                },
+                visible: (!powermode ? true : false) && (showmax ? true : false) ? true : false
+            },
+
+            {
+                type: 'line',
+                yref: 'y',
+                xref: 'paper',
+                x0: 0,
+                y0: (GraphEndPoint.data?.["24hr"]?.["device" + String(device_num)]?.["channel" + String(channel_num)]?.voltage?.min ? GraphEndPoint.data["24hr"]?.["device" + String(device_num)]?.["channel" + String(channel_num)]?.voltage?.min : []),
+                x1:  1,
+                y1: (GraphEndPoint.data?.["24hr"]?.["device" + String(device_num)]?.["channel" + String(channel_num)]?.voltage?.min ? GraphEndPoint.data["24hr"]?.["device" + String(device_num)]?.["channel" + String(channel_num)]?.voltage?.min : []),
+                line: {
+                    color: 'rgb(71, 124, 181)',
+                    width: 2,
+                    dash: 'dot'
+                },
+                label: {
+                    font: {
+                        color: 'rgb(71, 124, 181)'
+                    },
+                    text: "voltage min",
+                    yanchor: 'bottom',
+                    textposition: 'start'
+                },
+                visible: (!powermode ? true : false) && (showmin ? true : false) ? true : false
+            },
+
+            {
+                type: 'line',
+                yref: 'y2',
+                xref: 'paper',
+                x0: 0,
+                y0: (GraphEndPoint.data?.["24hr"]?.["device" + String(device_num)]?.["channel" + String(channel_num)]?.current?.min ? GraphEndPoint.data["24hr"]?.["device" + String(device_num)]?.["channel" + String(channel_num)]?.current?.min : []),
+                x1:  1,
+                y1: (GraphEndPoint.data?.["24hr"]?.["device" + String(device_num)]?.["channel" + String(channel_num)]?.current?.min ? GraphEndPoint.data["24hr"]?.["device" + String(device_num)]?.["channel" + String(channel_num)]?.current?.min : []),
+                line: {
+                    color: 'rgb(245, 144, 44)',
+                    width: 2,
+                    dash: 'dot'
+                },
+                label: {
+                    font: {
+                        color: 'rgb(245, 144, 44)'
+                    },
+                    text: "current min",
+                    yanchor: 'bottom',
+                    textposition: 'end'
+                },
+                visible: (!powermode ? true : false) && (showmin ? true : false) ? true : false
+            },
+
+            {
+                type: 'line',
+                yref: (powermode ? 'y3' : 'y'),
+                xref: 'paper',
+                x0: 0,
+                y0: (GraphEndPoint.data?.["24hr"]?.["device" + String(device_num)]?.["channel" + String(channel_num)]?.power?.min ? GraphEndPoint.data["24hr"]?.["device" + String(device_num)]?.["channel" + String(channel_num)]?.power?.min : []),
+                x1:  1,
+                y1: (GraphEndPoint.data?.["24hr"]?.["device" + String(device_num)]?.["channel" + String(channel_num)]?.power?.min ? GraphEndPoint.data["24hr"]?.["device" + String(device_num)]?.["channel" + String(channel_num)]?.power?.min : []),
+                line: {
+                    color: 'rgb(71, 124, 181)',
+                    width: 2,
+                    dash: 'dot'
+                },
+                label: {
+                    font: {
+                        color: 'rgb(71, 124, 181)'
+                    },
+                    text: "power min",
+                    yanchor: 'bottom',
+                    textposition: 'start'
+                },
+                visible: (powermode ? true : false) && (showmin ? true : false) ? true : false
+            },
+
+            {
+                type: 'line',
+                yref: (powermode ? 'y3' : 'y'),
+                xref: 'paper',
+                x0: 0,
+                y0: (GraphEndPoint.data?.["24hr"]?.["device" + String(device_num)]?.["channel" + String(channel_num)]?.power?.max ? GraphEndPoint.data["24hr"]?.["device" + String(device_num)]?.["channel" + String(channel_num)]?.power?.max : []),
+                x1:  1,
+                y1: (GraphEndPoint.data?.["24hr"]?.["device" + String(device_num)]?.["channel" + String(channel_num)]?.power?.max ? GraphEndPoint.data["24hr"]?.["device" + String(device_num)]?.["channel" + String(channel_num)]?.power?.max : []),
+                line: {
+                    color: 'rgb(71, 124, 181)',
+                    width: 2,
+                    dash: 'dot'
+                },
+                label: {
+                    font: {
+                        color: 'rgb(71, 124, 181)'
+                    },
+                    text: "power max",
+                    yanchor: 'bottom',
+                    textposition: 'start'
+                },
+                visible: (powermode ? true : false) && (showmax ? true : false) ? true : false
             }
         ]
     }
@@ -348,20 +634,32 @@ function GraphChannel(props) {
         yaxis: 'y3',
         type: 'scatter',
         name: "power_5mins",
-        visible: (powermode ? true : false)
+        visible: (powermode ? true : false) 
     };
 
     var data_5mins = powermode ? [voltage_5mins, current_5mins, power_5mins] : [voltage_5mins, current_5mins];
 
-    function Toggle() {
+    function PowerToggle() {
         setPowermode(!powermode)
     }; 
+
+    function SettingsToggle() {
+        setShowSettings(!showsettings)
+    };
+
+    function MaxToggle() {
+        setShowMax(!showmax)
+    };
+
+    function MinToggle() {
+        setShowMin(!showmin)
+    };
 
     const selection = {
         "1min": [data_1min, layout_1min],
         "5mins": [data_5mins, layout_5mins],
         "24hr": [data_24hr, layout_24hr]
-    }
+    };
 
     return (
         <Container fluid>
@@ -369,10 +667,24 @@ function GraphChannel(props) {
             <Accordion.Body>
 
                 <Row>
-                    <ToggleSwitch checked={powermode} label="Power view" onClick={Toggle}/>
+                    <Col>
+                    <ToggleSwitch checked={powermode} label="Power view" onClick={PowerToggle}/>
+                    </Col>
                 </Row>
 
                 <Row><p></p></Row>
+
+                <Row>
+                    <Col>
+                        <ToggleSwitch checked={showsettings} label="Settings" onClick={SettingsToggle} disabled={timescale==="1min" || powermode}/>
+                    </Col>
+                    <Col>
+                        <ToggleSwitch checked={showmax} label="Maximums" onClick={MaxToggle} disabled={timescale==="1min"}/>
+                    </Col>
+                    <Col>
+                        <ToggleSwitch checked={showmin} label="Minimums" onClick={MinToggle} disabled={timescale==="1min"}/>
+                    </Col>
+                </Row>
 
                 <Row>
                     <Col>

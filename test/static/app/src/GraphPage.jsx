@@ -5,14 +5,11 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
 import Accordion from 'react-bootstrap/Accordion';
 import ToggleButton from 'react-bootstrap/ToggleButton';
 import ToggleButtonGroup from 'react-bootstrap/ToggleButtonGroup';
 
 import { useState } from 'react';
-
-import { ToggleSwitch } from 'odin-react';
 
 import GraphDevice from './GraphDevice';
 
@@ -20,7 +17,7 @@ function GraphPage(props) {
 
     const {PsuEndPoint, GraphEndPoint} = props;
 
-    const [timescale, setTimeScale] = useState();
+    const [timescale, setTimeScale] = useState("1min");
 
     // const [powermode, setPowermode] = useState(false);
 
@@ -68,7 +65,7 @@ function GraphPage(props) {
                 <ToggleButtonGroup type="radio" name="options">
                     <ToggleButton id="1min" value={1} variant="outline-secondary" onChange={() => changeTimeScale("1min")}>1 minute (/1 second)</ToggleButton>
                     <ToggleButton id="5mins" value={2} variant="outline-secondary" onChange={() => changeTimeScale("5mins")}>5 minutes avg (/5 seconds)</ToggleButton>
-                    <ToggleButton id="24hr" value={3} variant="outline-secondary" onChange={() => changeTimeScale("24hr")}>24 hours avg (/10 minutes)</ToggleButton>
+                    <ToggleButton id="24hr" value={3} variant="outline-secondary" onChange={() => changeTimeScale("24hr")}>24 hours avg (/1 minute)</ToggleButton>
                 </ToggleButtonGroup>
             </div>
 
