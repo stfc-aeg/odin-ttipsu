@@ -1,3 +1,25 @@
 {
-    
+    "5mins" : {
+        "device1" : {
+            "channel1" : {
+                "test" : {
+                    "adapter" : "ttipsu",
+                    "get_path" : "devices/1/channels/1/voltage/output",
+                    "interval" : 5,
+                    "retention" : 60,
+                    "location" : "5mins/device1/channel1/test"
+                }
+            }
+        }
+    },
+
+    "test" : {
+        "channel" : {
+            "adapter": "ttipsu",
+            "get_path" : "devices/1/channels/1/voltage/output",
+            "interval" : 10,
+            "retention" : 60,
+            "location" : "test/channel"
+        }
+    }
 }

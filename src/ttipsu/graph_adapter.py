@@ -18,7 +18,7 @@ import json
 
 class GraphDataset():
 
-    def __init__(self, time_interval, adapter, get_path, retention, name=None):
+    def __init__(self, time_interval, adapter, get_path, retention, location):
         self.time_interval = time_interval
         self.data = []
         self.timestamps = []
@@ -26,17 +26,16 @@ class GraphDataset():
         self.adapter = None
         self.get_path = get_path
         self.retention = retention
-        self.name = name
+        self.location = location
 
         self.max = max(self.data, default=0)
         self.min = min(self.data, default=0)
 
         self.data_loop = PeriodicCallback(self.get_data, self.time_interval * 1000)
 
-        logging.debug("Created Dataset %s, interval of %f seconds", name, self.time_interval)
+        logging.debug("Created Dataset %s, interval of %f seconds", location, self.time_interval)
 
         self.param_tree = ParameterTree({
-            "name": (self.name, None),
             "data": (lambda: self.data, None),
             "timestamps": (lambda: self.timestamps, None),
             "interval": (self.time_interval, None),
@@ -69,8 +68,8 @@ class GraphDataset():
 
 class AvgGraphDataset(GraphDataset):
     
-    def __init__(self, time_interval, retention, name, source):
-        super().__init__(time_interval, adapter=None, get_path=None, retention=retention, name=name)
+    def __init__(self, time_interval, retention, source, location):
+        super().__init__(time_interval, adapter=None, get_path=None, retention=retention, location=location)
         
         self.source = source
         self.num_points_get = int(self.time_interval / self.source.time_interval)
@@ -78,7 +77,7 @@ class AvgGraphDataset(GraphDataset):
         self.min_list = []
         self.max_list = []
 
-        logging.debug("This is an averaging dataset, averaging from %s", self.source)
+        logging.debug("Created averaging dataset " + location + ", averaging from %s", self.source)
 
     def get_data(self):
         cur_time = time.strftime("%H:%M:%S", time.localtime())
@@ -132,19 +131,30 @@ class GraphAdapter(ApiAdapter):
 
         with open(self.dataset_config) as f:
             config = json.load(f)
-            for name, info in config.items():
+            
+            endpoints = []
+
+            def get_last_dict(dictionary):
+                for outer_key, outer_value in dictionary.items():
+                    for inner_key, inner_value in outer_value.items():
+                        if isinstance(inner_value, dict):
+                            get_last_dict(outer_value)
+                        else:
+                            if (outer_key, outer_value) not in endpoints:
+                                endpoints.append((outer_key, outer_value))
+                logging.debug(endpoints)
+                return endpoints
+            #extract innermost dictionary - including it's key
+            
+            for key, value in get_last_dict(config):
                 try:
-                    if info.get('average', False):
-                        self.add_avg_dataset(info['interval'], info['retention'], name, info['source'], name) #test this!
+                    if value.get('average', False):
+                        self.add_avg_dataset(value['interval'], value['retention'], value['source'], value['location'])
                     else:
-                        self.add_dataset(info['adapter'], info['get_path'], info['interval'], info['retention'], name, name)
+                        self.add_dataset(value['adapter'], value['get_path'], value['interval'], value['retention'], value['location'])
                     
                 except KeyError as err:
-                    logging.error("Error creating dataset %s: %s", (name), err)
-
-        self.param_tree = ParameterTree({
-            name: dataset.param_tree for (name, dataset) in self.dataset_trees.items()
-        }) 
+                    logging.error("Error creating dataset %s: %s", (value['location']), err)
 
     def add_to_dict(self, location, data, dict):
         param_dict = dict
@@ -159,14 +169,14 @@ class GraphAdapter(ApiAdapter):
                 param_dict[path_part] = {}
                 param_dict = param_dict[path_part]
 
-    def add_dataset(self, adapter, path, interval, retention, name, location):
+    def add_dataset(self, adapter, path, interval, retention, location):
 
         dataset = GraphDataset(
             time_interval=interval,
             adapter=adapter,
             get_path=path,
             retention=retention,
-            name=name
+            location=location
             )
 
         self.add_to_dict(location, dataset.param_tree, self.dataset_trees)
@@ -174,15 +184,20 @@ class GraphAdapter(ApiAdapter):
 
         self.param_tree = ParameterTree(self.dataset_trees)
 
-    def add_avg_dataset(self, interval, retention, name, source, location):
+    def add_avg_dataset(self, interval, retention, source, location):
 
-        source_dataset = self.datasets[source.split("/")[0]][source.split("/")[1]][source.split("/")[2]][source.split("/")[3]]
+        source_location = source.strip("/").split("/")
+        dataset_location = self.datasets
+        for path_part in source_location:
+            dataset_location = dataset_location[path_part]
+        source_dataset = dataset_location
+        #getting source dataset - variable location path length
 
         dataset = AvgGraphDataset(
             time_interval=interval,
             retention=retention,
-            name=name,
-            source=source_dataset 
+            source=source_dataset,
+            location=location 
         )
 
         self.add_to_dict(location, dataset.param_tree, self.dataset_trees)
@@ -196,13 +211,20 @@ class GraphAdapter(ApiAdapter):
         logging.debug("Received following dict of Adapters: %s", self.adapters)
         # logging.debug("Getting adapter %s", self.target_adapter)
 
-        for name, time in self.datasets.items():
-            for name, device in time.items():
-                for name, channel in device.items():
-                    for name, dataset in channel.items():
-                        dataset.get_adapter(self.adapters)
-                        dataset.data_loop.start()
+        endpoints = []
 
+        def iterate_dict(dictionary):
+            for key, value in dictionary.items():
+                if isinstance(value, dict):
+                    iterate_dict(value)
+                else:
+                    endpoints.append(value)
+            return endpoints
+
+        for dataset in iterate_dict(self.datasets):
+            dataset.get_adapter(self.adapters)
+            dataset.data_loop.start()
+        #start loop for each dataset
 
     def get(self, path, request):
         """

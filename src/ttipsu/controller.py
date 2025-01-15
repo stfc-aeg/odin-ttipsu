@@ -80,14 +80,14 @@ class PsuController():
                 current_name = "device" + str(device.num) + "_channel" + str(channel.num) + "_current"
                 power_name = "device" + str(device.num) + "_channel" + str(channel.num) + "_power"
 
-                self.graph_adapter.add_dataset("ttipsu", ("devices/" + str(device.num) + "/channels/" + str(channel.num) + "/voltage/output"), 1, 60, voltage_name, ("1min/device" + str(device.num) + "/channel" + str(channel.num) + "/voltage"))
-                self.graph_adapter.add_dataset("ttipsu", ("devices/" + str(device.num) + "/channels/" + str(channel.num) + "/current/output"), 1, 60, current_name, ("1min/device" + str(device.num) + "/channel" + str(channel.num) + "/current"))
-                self.graph_adapter.add_dataset("ttipsu", ("devices/" + str(device.num) + "/channels/" + str(channel.num) + "/power/output"), 1, 60, power_name, ("1min/device" + str(device.num) + "/channel" + str(channel.num) + "/power"))
+                self.graph_adapter.add_dataset("ttipsu", ("devices/" + str(device.num) + "/channels/" + str(channel.num) + "/voltage/output"), 1, 60, ("1min/device" + str(device.num) + "/channel" + str(channel.num) + "/voltage"))
+                self.graph_adapter.add_dataset("ttipsu", ("devices/" + str(device.num) + "/channels/" + str(channel.num) + "/current/output"), 1, 60, ("1min/device" + str(device.num) + "/channel" + str(channel.num) + "/current"))
+                self.graph_adapter.add_dataset("ttipsu", ("devices/" + str(device.num) + "/channels/" + str(channel.num) + "/power/output"), 1, 60, ("1min/device" + str(device.num) + "/channel" + str(channel.num) + "/power"))
 
-                self.graph_adapter.add_avg_dataset(5, 60, "5min_avg_voltage", ("1min/device" + str(device.num) + "/channel" + str(channel.num) + "/voltage"), ("5mins/device" + str(device.num) + "/channel" + str(channel.num) + "/voltage"))
-                self.graph_adapter.add_avg_dataset(5, 60, "5min_avg_current", ("1min/device" + str(device.num) + "/channel" + str(channel.num) + "/current"), ("5mins/device" + str(device.num) + "/channel" + str(channel.num) + "/current"))
-                self.graph_adapter.add_avg_dataset(5, 60, "5min_avg_power", ("1min/device" + str(device.num) + "/channel" + str(channel.num) + "/power"), ("5mins/device" + str(device.num) + "/channel" + str(channel.num) + "/power"))
+                self.graph_adapter.add_avg_dataset(5, 60, ("1min/device" + str(device.num) + "/channel" + str(channel.num) + "/voltage"), ("5mins/device" + str(device.num) + "/channel" + str(channel.num) + "/voltage"))
+                self.graph_adapter.add_avg_dataset(5, 60, ("1min/device" + str(device.num) + "/channel" + str(channel.num) + "/current"), ("5mins/device" + str(device.num) + "/channel" + str(channel.num) + "/current"))
+                self.graph_adapter.add_avg_dataset(5, 60, ("1min/device" + str(device.num) + "/channel" + str(channel.num) + "/power"), ("5mins/device" + str(device.num) + "/channel" + str(channel.num) + "/power"))
 
-                self.graph_adapter.add_avg_dataset(60, 1440, "24hr_avg_voltage", ("1min/device" + str(device.num) + "/channel" + str(channel.num) + "/voltage"), ("24hr/device" + str(device.num) + "/channel" + str(channel.num) + "/voltage"))
-                self.graph_adapter.add_avg_dataset(60, 1440, "24hr_avg_current", ("1min/device" + str(device.num) + "/channel" + str(channel.num) + "/current"), ("24hr/device" + str(device.num) + "/channel" + str(channel.num) + "/current"))
-                self.graph_adapter.add_avg_dataset(60, 1440, "24hr_avg_power", ("1min/device" + str(device.num) + "/channel" + str(channel.num) + "/power"), ("24hr/device" + str(device.num) + "/channel" + str(channel.num) + "/power"))
+                self.graph_adapter.add_avg_dataset(60, 1440, ("1min/device" + str(device.num) + "/channel" + str(channel.num) + "/voltage"), ("24hr/device" + str(device.num) + "/channel" + str(channel.num) + "/voltage"))
+                self.graph_adapter.add_avg_dataset(60, 1440, ("1min/device" + str(device.num) + "/channel" + str(channel.num) + "/current"), ("24hr/device" + str(device.num) + "/channel" + str(channel.num) + "/current"))
+                self.graph_adapter.add_avg_dataset(60, 1440, ("1min/device" + str(device.num) + "/channel" + str(channel.num) + "/power"), ("24hr/device" + str(device.num) + "/channel" + str(channel.num) + "/power"))
