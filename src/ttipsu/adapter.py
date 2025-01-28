@@ -22,19 +22,11 @@ class TtiPsuAdapter(ApiAdapter):
         # Intialise superclass
         super(TtiPsuAdapter, self).__init__(**kwargs)
 
-        # Parse options
-        # background_task_interval = float(self.options.get('background_task_interval', 1.0))
-        # connections = self.options.get('connections').split(" ")
-
-        # self.controller = PsuController(background_task_interval, connections, None)
-        # logging.debug('PsuAdapter loaded')
-
     def initialize(self, adapters):
         adapters_list = dict((k, v) for k, v in adapters.items() if v is not self)
-        graph_adapter = adapters_list["graph"]
-        # graph_adapter.load_config()
+        graph_adapter = adapters_list["graphing"]
 
-        # # Parse options
+        # Parse options
         background_task_interval = float(self.options.get('background_task_interval', 1.0))
         connections = self.options.get('connections').split(" ")
 

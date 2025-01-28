@@ -73,6 +73,7 @@ class PsuController():
         self.background_task_interval = float(interval)
 
     def load_graphs(self):
+        """Create datasets in graphing adapter."""
         for device in self.devices:
             channel_names = []
             for channel in device.get_channels():
@@ -91,3 +92,6 @@ class PsuController():
                 self.graph_adapter.add_avg_dataset(60, 1440, ("1min/device" + str(device.num) + "/channel" + str(channel.num) + "/voltage"), ("24hr/device" + str(device.num) + "/channel" + str(channel.num) + "/voltage"))
                 self.graph_adapter.add_avg_dataset(60, 1440, ("1min/device" + str(device.num) + "/channel" + str(channel.num) + "/current"), ("24hr/device" + str(device.num) + "/channel" + str(channel.num) + "/current"))
                 self.graph_adapter.add_avg_dataset(60, 1440, ("1min/device" + str(device.num) + "/channel" + str(channel.num) + "/power"), ("24hr/device" + str(device.num) + "/channel" + str(channel.num) + "/power"))
+
+                self.graph_adapter.initialize_tree()
+                

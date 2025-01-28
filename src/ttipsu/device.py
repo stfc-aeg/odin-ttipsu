@@ -42,8 +42,6 @@ class PsuDevice():
         self.channel_trees = {}
         self.remote_enable = 0
 
-        self.uptime_axis = []
-
         try:
             self.s.settimeout(3)
             self.s.connect((self.host, self.port))
@@ -69,7 +67,6 @@ class PsuDevice():
             'channels': ParameterTree(self.channel_trees),
             'remote_enable': (lambda: self.remote_enable, self.set_remote_enable),
             'bg_task_uptime': (self.get_uptime, None),
-            'uptime_axis': (lambda: self.uptime_axis, None)
         })
 
         if self.remote_enable:
@@ -123,8 +120,6 @@ class PsuDevice():
         self.remote_enable = False
         self.background_task.stop()
         self.uptime_axis = []
-        # for channel in self.channels:
-        #     channel.reset_graphs()
 
     def get_uptime(self):
         """Get uptime of background tasks"""
@@ -133,15 +128,9 @@ class PsuDevice():
         else:
             uptime = 0
         return uptime
-    
-    def update_uptime(self, time):
-        self.uptime_axis.append(time)
-        if len(self.uptime_axis) > 30:
-            self.uptime_axis.pop(0)
 
     def background_callback(self):
         """Get voltage and current output readback from psu."""
-        self.update_uptime(self.get_uptime())
         for channel in self.channels:
             voltage = channel.read_voltage()
             current = channel.read_current()
