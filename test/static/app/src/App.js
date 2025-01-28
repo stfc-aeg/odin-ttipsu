@@ -13,7 +13,7 @@ function App() {
 
   const PsuEndPoint = useAdapterEndpoint("ttipsu", "http://192.168.0.14:8888", 1000);
 
-  const GraphEndPoint = useAdapterEndpoint("graph", "http://192.168.0.14:8888");
+  const GraphEndPoint = useAdapterEndpoint("graphing", "http://192.168.0.14:8888");
 
   return (
     <OdinApp title="TTi PSU Adapter"

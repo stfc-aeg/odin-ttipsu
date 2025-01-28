@@ -15,8 +15,6 @@ function MainPage(props) {
 
     const {PsuEndPoint} = props;
 
-    //const PsuEndPoint = useAdapterEndpoint("ttipsu", "http://localhost:8888", 1000);
-
     const DeviceList = PsuEndPoint.data?.devices ? Object.entries(PsuEndPoint.data?.devices).map(
                             ([key, value]) => (
                                 <Accordion.Item eventKey={key}>

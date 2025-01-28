@@ -19,8 +19,6 @@ function GraphPage(props) {
 
     const [timescale, setTimeScale] = useState("1min");
 
-    // const [powermode, setPowermode] = useState(false);
-
     const Devices = PsuEndPoint.data?.devices ? Object.entries(PsuEndPoint.data.devices).map(
         ([key, value]) => (
             <Accordion.Item eventKey={key}>
@@ -35,7 +33,6 @@ function GraphPage(props) {
     React.useEffect(function() {
         if (timescale) {
             var timer_id = setInterval(function() {
-                // console.log("TICK");
                 GraphEndPoint.get(timescale + "/").then(function (result)
                 {
                     GraphEndPoint.mergeData(result[timescale], (timescale + "/"));
@@ -52,10 +49,6 @@ function GraphPage(props) {
         setTimeScale(timescale)
     };
 
-    // function togglePower() {
-    //     setPowermode(!powermode)
-    // }; 
-
     return (
         <Container fluid>
 
@@ -70,14 +63,6 @@ function GraphPage(props) {
             </div>
 
             <Row><p></p></Row>
-
-            {/* <Row>
-                    <Col>
-                        <ToggleSwitch checked={powermode} label="Power view" onClick={togglePower}/>
-                    </Col>
-            </Row>
-
-            <Row><p></p></Row> */}
 
             <Accordion alwaysOpen>
                 {Devices}
